@@ -7,9 +7,8 @@ using UnityEngine;
 public class EncounterCards : ScriptableObject
 {
     public string cardName;
-    [SerializeField]
-    public static TextAsset jsonText;
-    public string mainText = jsonText.text;
+
+    public string mainText;
     public Sprite artwork;
 
     public int cardNumber;

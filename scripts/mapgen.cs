@@ -186,7 +186,7 @@ public class mapgen : NetworkBehaviour
             if (E < 0.3) tileMap.SetTile(new Vector3Int(x, y, 0), water[0]);
             else if (E < 0.35)
             {
-                int isCity = UnityEngine.Random.Range(0, 150);
+                int isCity = UnityEngine.Random.Range(0, 101);
                 if ((isCity == 45) && (isCityMax == false))
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), Cities[0]);
@@ -205,7 +205,7 @@ public class mapgen : NetworkBehaviour
             else if (E < 0.4)
             {
                 
-                int isCity = UnityEngine.Random.Range(0, 150);
+                int isCity = UnityEngine.Random.Range(0, 151);
                 if ((isCity == 45) && (isCityMax == false))
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), Cities[0]);
@@ -256,7 +256,7 @@ public class mapgen : NetworkBehaviour
             }
             else if (E < 0.65)
             {
-                int isCity = UnityEngine.Random.Range(0, 150);
+                int isCity = UnityEngine.Random.Range(0, 300);
                 if ((isCity == 45) && (isCityMax == false))
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), Cities[0]);

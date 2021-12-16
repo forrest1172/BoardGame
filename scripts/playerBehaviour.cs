@@ -7,7 +7,7 @@ using System;
 
 public class playerBehaviour : NetworkBehaviour
 {
-    public int ap;
+    public int numCanMove;
     public int health;
     public int scrap;
     public GameObject manager;
@@ -22,6 +22,12 @@ public class playerBehaviour : NetworkBehaviour
     private Vector3 Origin;
     private Vector3 Diference;
     private bool Drag = false;
+
+    public Vector3Int[] leftTiles;
+    public Vector3Int[] rightTiles;
+    public Vector3Int[] UpTiles;
+    public Vector3Int[] DownTiles;
+
 
 
     void Start()
@@ -67,7 +73,26 @@ public class playerBehaviour : NetworkBehaviour
             Enabled[2].SetActive(false);
             Enabled[3].SetActive(false);
             Enabled[4].SetActive(true);
+            GetWalkableTiles();
         }
+        
+    }
+
+    public void GetWalkableTiles()
+    {
+        float x = transform.position.x;
+        float y = transform.position.y - 0.5f;
+        int X = (int)x;
+        int Y = (int)y;
+        for(int i = 0; i < numCanMove; i++)
+        {
+            leftTiles[i] = new Vector3Int(X - (1 + i), Y, 0);
+            rightTiles[i] = new Vector3Int(X + (1 + i), Y, 0);
+            UpTiles[i] = new Vector3Int(X, Y + (1 + i), 0);
+            DownTiles[i] = new Vector3Int(X, Y - (1 + i), 0);
+
+        }
+        
 
     }
     public void Up()
