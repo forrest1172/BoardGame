@@ -22,20 +22,23 @@ public class playerBehaviour : NetworkBehaviour
     private Vector3 Origin;
     private Vector3 Diference;
     private bool Drag = false;
-
-    public Vector3Int[] leftTiles;
-    public Vector3Int[] rightTiles;
-    public Vector3Int[] UpTiles;
-    public Vector3Int[] DownTiles;
-
-
+    
+    public List leftTiles = new List<Vector3>();
+    public List rightTiles = new List<Vector3>();
+    public List upTiles = new List<Vector3>();
+    public List downTiles = new List<Vector3>();
+    
+    //public Vector3Int[] leftTiles;
+    //public Vector3Int[] rightTiles;
+    //public Vector3Int[] UpTiles;
+    //public Vector3Int[] DownTiles;
+    
+    
 
     void Start()
     {
         
-    
-
-    
+            
         tilemap = GameObject.FindGameObjectWithTag("TileMap");
         manager = GameObject.FindGameObjectWithTag("GameManager");
         manager.GetComponent<mapgen>().GetSeed();
@@ -86,7 +89,7 @@ public class playerBehaviour : NetworkBehaviour
         int Y = (int)y;
         for(int i = 0; i < numCanMove; i++)
         {
-            leftTiles[i] = new Vector3Int(X - (1 + i), Y, 0);
+            leftTiles[i].Add = new Vector3Int(X - (1 + i), Y, 0);
             rightTiles[i] = new Vector3Int(X + (1 + i), Y, 0);
             UpTiles[i] = new Vector3Int(X, Y + (1 + i), 0);
             DownTiles[i] = new Vector3Int(X, Y - (1 + i), 0);
@@ -100,7 +103,7 @@ public class playerBehaviour : NetworkBehaviour
         if (isLocalPlayer == true)
         {
             float x = transform.position.x;
-            float y = transform.position.y;
+            float y = transform.position.y - 0.5f;
             int X = (int)x;
             int Y = (int)y;
             Vector3Int cp = new Vector3Int(X ,Y ,0);
