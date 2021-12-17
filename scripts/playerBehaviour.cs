@@ -89,7 +89,8 @@ public class playerBehaviour : NetworkBehaviour
         int Y = (int)y;
         for(int i = 0; i < numCanMove; i++)
         {
-            leftTiles[i].Add = new Vector3Int(X - (1 + i), Y, 0);
+            Vector3 left = new Vector3Int(X - (1 + i), Y, 0);
+            leftTiles.Add;
             rightTiles[i] = new Vector3Int(X + (1 + i), Y, 0);
             UpTiles[i] = new Vector3Int(X, Y + (1 + i), 0);
             DownTiles[i] = new Vector3Int(X, Y - (1 + i), 0);
