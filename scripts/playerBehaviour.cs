@@ -90,10 +90,17 @@ public class playerBehaviour : NetworkBehaviour
         for(int i = 0; i < numCanMove; i++)
         {
             Vector3 left = new Vector3Int(X - (1 + i), Y, 0);
-            leftTiles.Add;
-            rightTiles[i] = new Vector3Int(X + (1 + i), Y, 0);
-            UpTiles[i] = new Vector3Int(X, Y + (1 + i), 0);
-            DownTiles[i] = new Vector3Int(X, Y - (1 + i), 0);
+            leftTiles.Add(left);
+            
+            Vector3 right = new Vector3Int(X + (1 + i), Y, 0);
+            rightTiles.Add(right);
+            
+            Vector3 up = new Vector3Int(X, Y + (1 + i), 0);
+            upTiles.Add(up);
+            
+            Vector3 down = new Vector3Int(X, Y - (1 + i), 0);
+            downTiles.Add(down);
+
 
         }
         
@@ -113,6 +120,10 @@ public class playerBehaviour : NetworkBehaviour
             if (nt != manager.GetComponent<mapgen>().water[0])
             {
                 this.transform.position = new Vector3(x, y + 1, 0);
+                leftTiles.Clear();
+                rightTiles.Clear();
+                upTiles.Clear();
+                downTiles.Clear();
 
             }
 
@@ -140,6 +151,10 @@ public class playerBehaviour : NetworkBehaviour
             if (nt != manager.GetComponent<mapgen>().water[0])
             {
                 transform.position = new Vector3(x, y - 1, 0);
+                leftTiles.Clear();
+                rightTiles.Clear();
+                upTiles.Clear();
+                downTiles.Clear();
 
             }
 
@@ -164,7 +179,10 @@ public class playerBehaviour : NetworkBehaviour
                 GetComponent<SpriteRenderer>().flipX = true;
                 transform.position = new Vector3(x - 1, y, 0);
                 manager.GetComponent<GenerateEncounter>().GenEncounter(nt);
-               
+                leftTiles.Clear();
+                rightTiles.Clear();
+                upTiles.Clear();
+                downTiles.Clear();
 
             }
 
@@ -189,6 +207,10 @@ public class playerBehaviour : NetworkBehaviour
             {
                 GetComponent<SpriteRenderer>().flipX = false;
                 transform.position = new Vector3(x + 1, y, 0);
+                leftTiles.Clear();
+                rightTiles.Clear();
+                upTiles.Clear();
+                downTiles.Clear();
 
             }
 
