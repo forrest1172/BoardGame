@@ -5,20 +5,21 @@ using UnityEngine.Tilemaps;
 
 public class GenerateEncounter : MonoBehaviour
 {
-    public EncounterCards[] sand;
+    public GameObject[] sand;
+    
     // Start is called before the first frame update
     void Start()
     {
         
     }
 
-    public void GenEncounter(TileBase currentTile)
+    public void GenEncounter(TileBase currentTile, GameObject player)
     {
         if(currentTile.name == "sand")
         {
             int i = Random.Range(0, sand.Length);
 
-            Instantiate(sand[i]);
+            Instantiate(sand[i],player.GetComponentInChildren<Canvas>().transform);
 
             Debug.Log("gen sand encounter");
             

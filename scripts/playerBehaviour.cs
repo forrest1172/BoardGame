@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.Tilemaps;
 using System;
+using System.Linq;
 
 public class playerBehaviour : NetworkBehaviour
 {
@@ -17,36 +18,55 @@ public class playerBehaviour : NetworkBehaviour
     public GameObject tilemap;
     [SyncVar]
     public string home = "";
+    [SyncVar]
+    public int myTurnNumber;
+
+    public bool startSelected;
+    public bool setOrders;
+    public List<GameObject> Agents = new List<GameObject>();
 
     private Vector3 ResetCamera;
     private Vector3 Origin;
     private Vector3 Diference;
     private bool Drag = false;
-    
-    public List leftTiles = new List<Vector3>();
-    public List rightTiles = new List<Vector3>();
-    public List upTiles = new List<Vector3>();
-    public List downTiles = new List<Vector3>();
-    
-    //public Vector3Int[] leftTiles;
-    //public Vector3Int[] rightTiles;
-    //public Vector3Int[] UpTiles;
-    //public Vector3Int[] DownTiles;
-    
-    
+
+    //maybe put on tilemap object
+    public BoundsInt area;
+    public GameObject playerRadius;
+
+    public List<Vector3Int> tileNeighbors = new List<Vector3Int>();
+    private int storedNumsCanMove;
+
+    /*public Vector3Int[] leftTiles;
+    public Vector3Int[] rightTiles;
+    public Vector3Int[] UpTiles;
+    public Vector3Int[] DownTiles;
+    public Vector3Int[] upLeftTiles;
+    public Vector3Int[] DownTiles;
+    */
+    private Tilemap map;
+
 
     void Start()
     {
         
-            
-        tilemap = GameObject.FindGameObjectWithTag("TileMap");
-        manager = GameObject.FindGameObjectWithTag("GameManager");
-        manager.GetComponent<mapgen>().GetSeed();
-        manager.GetComponent<mapgen>().currentSeed = MySeedNumber;
+    
 
+    
+        
         if (isLocalPlayer)
         {
+            storedNumsCanMove = numCanMove;
+            tilemap = GameObject.FindGameObjectWithTag("TileMap");
+            manager = GameObject.FindGameObjectWithTag("GameManager");
+            manager.GetComponent<mapgen>().GetSeed();
+            manager.GetComponent<mapgen>().currentSeed = MySeedNumber;
+            map = tilemap.GetComponent<Tilemap>();
+            Agents.AddRange(GameObject.FindGameObjectsWithTag ("Agent"));
             Enabled[0].SetActive(true);
+            GetComponent<playerStats>().Genstats();
+            manager.GetComponent<Manager>().players.Add(this.gameObject);
+            manager.GetComponent<Manager>().Ready();
         }
         if (!isLocalPlayer)
         {
@@ -61,8 +81,7 @@ public class playerBehaviour : NetworkBehaviour
 
             Enabled[0].SetActive(false);
             Enabled[1].SetActive(true);
-            Enabled[2].SetActive(true);
-            Enabled[3].SetActive(true);
+
 
         }
 
@@ -73,150 +92,91 @@ public class playerBehaviour : NetworkBehaviour
         {
             Enabled[0].SetActive(false);
             Enabled[1].SetActive(false);
-            Enabled[2].SetActive(false);
-            Enabled[3].SetActive(false);
-            Enabled[4].SetActive(true);
+            Enabled[2].SetActive(true);
+            playerRadius.SetActive(true);
             GetWalkableTiles();
         }
         
     }
-
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(area.center, area.size);
+    }
     public void GetWalkableTiles()
     {
-        float x = transform.position.x;
-        float y = transform.position.y - 0.5f;
-        int X = (int)x;
-        int Y = (int)y;
-        for(int i = 0; i < numCanMove; i++)
-        {
-            Vector3 left = new Vector3Int(X - (1 + i), Y, 0);
-            leftTiles.Add(left);
-            
-            Vector3 right = new Vector3Int(X + (1 + i), Y, 0);
-            rightTiles.Add(right);
-            
-            Vector3 up = new Vector3Int(X, Y + (1 + i), 0);
-            upTiles.Add(up);
-            
-            Vector3 down = new Vector3Int(X, Y - (1 + i), 0);
-            downTiles.Add(down);
-
-
-        }
+        tileNeighbors.Clear();
         
-
-    }
-    public void Up()
-    {
-        if (isLocalPlayer == true)
+        if (numCanMove <= 0)
         {
+            playerRadius.SetActive(false);
+            //endTurn on current tile
+            return;
+        }
+        else
+        {
+            area.position = new Vector3Int(Mathf.RoundToInt(transform.position.x - 1.5f), Mathf.RoundToInt(transform.position.y - 1.5f), 0);
+            area.size = new Vector3Int(3, 3, 0);
+
             float x = transform.position.x;
             float y = transform.position.y - 0.5f;
             int X = (int)x;
             int Y = (int)y;
-            Vector3Int cp = new Vector3Int(X ,Y ,0);
-            Vector3Int np = new Vector3Int(X, Y + 1, 0);
-            TileBase nt = tilemap.GetComponent<Tilemap>().GetTile(np);
-            if (nt != manager.GetComponent<mapgen>().water[0])
-            {
-                this.transform.position = new Vector3(x, y + 1, 0);
-                leftTiles.Clear();
-                rightTiles.Clear();
-                upTiles.Clear();
-                downTiles.Clear();
 
-            }
 
-            else return;
 
             
-           
+            for (int i = 0; i < 1; i++)
+            {
+                
+                Vector3 left = new Vector3Int(X - (1 + i), Y, 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(left));
+                
+
+                Vector3 right = new Vector3Int(X + (1 + i), Y, 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(right));
+
+                Vector3 up = new Vector3Int(X, Y + (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(up));
+
+                Vector3 down = new Vector3Int(X, Y - (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(down));
+
+                Vector3 upLeft = new Vector3Int(X - (1 + i), Y + (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(upLeft));
+
+                Vector3 downLeft = new Vector3Int(X - (1 + i), Y - (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(downLeft));
+
+                Vector3 upRight = new Vector3Int(X + (1 + i), Y + (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(upRight));
+
+                Vector3 downRight = new Vector3Int(X + (1 + i), Y - (1 + i), 0);
+                tileNeighbors.Add(Vector3Int.FloorToInt(downRight));
+
+            }
             
-            
         }
-
+        
+        
 
     }
-    public void Down()
+    
+    public void EndTurn()
     {
-        if (isLocalPlayer == true)
-        {
-            float x = transform.position.x;
-            float y = transform.position.y;
-            int X = (int)x;
-            int Y = (int)y;
-            Vector3Int cp = new Vector3Int(X, Y, 0);
-            Vector3Int np = new Vector3Int(X, Y - 1, 0);
-            TileBase nt = tilemap.GetComponent<Tilemap>().GetTile(np);
-            if (nt != manager.GetComponent<mapgen>().water[0])
-            {
-                transform.position = new Vector3(x, y - 1, 0);
-                leftTiles.Clear();
-                rightTiles.Clear();
-                upTiles.Clear();
-                downTiles.Clear();
+        Enabled[2].SetActive(false);
 
-            }
-
-            else return;
-        }
-
-
-    }
-    public void Left()
-    {
-        if (isLocalPlayer == true)
-        {
-            float x = transform.position.x;
-            float y = transform.position.y;
-            int X = (int)x;
-            int Y = (int)y;
-            Vector3Int cp = new Vector3Int(X, Y, 0);
-            Vector3Int np = new Vector3Int(X - 1, Y, 0);
-            TileBase nt = tilemap.GetComponent<Tilemap>().GetTile(np);
-            if (nt != manager.GetComponent<mapgen>().water[0])
-            {
-                GetComponent<SpriteRenderer>().flipX = true;
-                transform.position = new Vector3(x - 1, y, 0);
-                manager.GetComponent<GenerateEncounter>().GenEncounter(nt);
-                leftTiles.Clear();
-                rightTiles.Clear();
-                upTiles.Clear();
-                downTiles.Clear();
-
-            }
-
-            else return;
-
-        }
-
-
-    }
-    public void Right()
-    {
-        if (isLocalPlayer == true)
-        {
-            float x = transform.position.x;
-            float y = transform.position.y;
-            int X = (int)x;
-            int Y = (int)y;
-            Vector3Int cp = new Vector3Int(X, Y, 0);
-            Vector3Int np = new Vector3Int(X + 1, Y, 0);
-            TileBase nt = tilemap.GetComponent<Tilemap>().GetTile(np);
-            if (nt != manager.GetComponent<mapgen>().water[0])
-            {
-                GetComponent<SpriteRenderer>().flipX = false;
-                transform.position = new Vector3(x + 1, y, 0);
-                leftTiles.Clear();
-                rightTiles.Clear();
-                upTiles.Clear();
-                downTiles.Clear();
-
-            }
-
-            else return;
-        }
-
+        //restart turn
+        Enabled[0].SetActive(true);
+        numCanMove = storedNumsCanMove;
+        float x = transform.position.x;
+        float y = transform.position.y - 0.5f;
+        int X = (int)x;
+        int Y = (int)y;
+        Vector3Int cp = new Vector3Int(X, Y, 0);
+        TileBase endTile = map.GetTile(cp);
+        manager.GetComponent<GenerateEncounter>().GenEncounter(endTile, this.gameObject);
+        playerRadius.SetActive(false);
 
     }
 
@@ -225,6 +185,10 @@ public class playerBehaviour : NetworkBehaviour
         
         Debug.Log("players home is " + homeName);
         home = homeName;
+    }
+    public void SetOrders()
+    {
+        setOrders = true;
     }
 
     void LateUpdate()
@@ -236,9 +200,56 @@ public class playerBehaviour : NetworkBehaviour
             {
                 manager.GetComponent<mapgen>().SpawnPlayer();
             }
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButtonDown(0))
             {
+                Vector3 pos = cam.ScreenToWorldPoint(Input.mousePosition);
+                Vector3Int tilePos = map.WorldToCell(pos);
+                TileBase selectedTile = map.GetTile(tilePos);
+                Debug.Log(selectedTile);
+                if(setOrders == true)
+                {
+                    if (startSelected == false)
+                    {
+                        manager.GetComponent<Astar>().Initialize(tilePos);
+                        startSelected = true;
+                    }
+                    else if (startSelected == true)
+                    {
+                        manager.GetComponent<Astar>().EndNode(tilePos);
+                        foreach (var go in Agents)
+                        {
+                            go.GetComponent<Agent>().GetOrders(tilePos);
+                        }
+                        startSelected = false;
+                        setOrders = false;
+                    }
+                }
 
+               
+                foreach(var tilesPositon in tileNeighbors.ToArray())
+                {
+                    
+                    if (tilesPositon == tilePos)
+                    {
+                        if (selectedTile != manager.GetComponent<mapgen>().water[0])
+                        {
+                            numCanMove--;
+                            transform.position = new Vector3(tilePos.x + 0.5f, tilePos.y + 0.5f, 0);
+                        }
+                        else if(tilesPositon != tilePos || selectedTile == manager.GetComponent<mapgen>().water[0])
+                        {
+                            Debug.Log("cannot move there");
+                        }
+                            
+
+                        
+                        GetWalkableTiles();
+                    }
+                }
+                
+            }
+           if (Input.GetMouseButton(0))
+            {
                 Diference = (cam.ScreenToWorldPoint(Input.mousePosition)) - cam.transform.position;
                 if (Drag == false)
                 {

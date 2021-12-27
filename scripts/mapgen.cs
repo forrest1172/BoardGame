@@ -24,6 +24,8 @@ public class mapgen : NetworkBehaviour
     public int maxCityLimit = 10;
    
     public GameObject player;
+
+   
     
     
 
@@ -38,7 +40,7 @@ public class mapgen : NetworkBehaviour
     public TileBase[] iceMountains;
     public TileBase[] Cities;
     public TileBase[] encounterSpot;
-    public TileBase debugSprite;
+    public TileBase[] debugSprite;
     public TextMeshProUGUI cityCount;
     private int numOfCities = 0;
     private bool isCityMax = false;
@@ -50,6 +52,7 @@ public class mapgen : NetworkBehaviour
     public TextMeshProUGUI seedText;
 
     public int currentSeed;
+   
     //public string MyGameSeed;
     
    
@@ -111,8 +114,9 @@ public class mapgen : NetworkBehaviour
     public void RandomizeMap()
 
     {
+        tileMap.ClearAllTiles();
         Mathf.Clamp(i, 0, maxCityLimit);
-
+        
         seedText.text = currentSeed.ToString();
 
         offsetX = UnityEngine.Random.Range(0, 9999);
@@ -193,18 +197,19 @@ public class mapgen : NetworkBehaviour
                     numOfCities += 1;
                     Debug.Log("city spawned at " + x + "," + y);
                     spawns[i].transform.position = new Vector3(x + 0.5f, y + 0.5f, 0);
-
+                    
                     i++;
                 }
                 else
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), beach[0]);
+                    
                 }
 
             }
             else if (E < 0.4)
             {
-                
+
                 int isCity = UnityEngine.Random.Range(0, 151);
                 if ((isCity == 45) && (isCityMax == false))
                 {
@@ -218,19 +223,22 @@ public class mapgen : NetworkBehaviour
                 else if (m < 0.5)
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), grass[0]);
+                   
                 }
-                else if(m > 0.7)
+                else if (m > 0.7)
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), swamp[0]);
+                    
                 }
-                else 
+                else
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), grass[0]);
+                    
                 }
 
 
             }
-            
+
             else if (E < 0.5)
             {
                 int isCity = UnityEngine.Random.Range(0, 200);
@@ -243,16 +251,17 @@ public class mapgen : NetworkBehaviour
                     
                     i++;
                 }
-               /* else if (m < 0.6)
-                {
-                    //add jungle tile
-                    tileMap.SetTile(new Vector3Int(x, y, 0), swamp[0]);
-                }*/
-                else 
+                /* else if (m < 0.6)
+                 {
+                     //add jungle tile
+                     tileMap.SetTile(new Vector3Int(x, y, 0), swamp[0]);
+                 }*/
+                else
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), forest[0]);
+                    
                 }
-                
+
             }
             else if (E < 0.65)
             {
@@ -263,27 +272,38 @@ public class mapgen : NetworkBehaviour
                     numOfCities += 1;
                     Debug.Log("city spawned at " + x + "," + y);
                     spawns[i].transform.position = new Vector3(x + 0.5f, y + 0.5f, 0);
-                    
+                   
                     i++;
                 }
                 else if (m < 0.5)
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), grass[0]);
+                    
                 }
                 else if (m > 0.8)
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), swamp[0]);
+                   
                 }
-                else 
+                else
                 {
                     tileMap.SetTile(new Vector3Int(x, y, 0), grass[0]);
+                    ;
                 }
 
 
             }
-            else if (E < 0.8) tileMap.SetTile(new Vector3Int(x, y, 0), desert[0]);
-            else if (E < 1.0) tileMap.SetTile(new Vector3Int(x, y, 0), iceMountains[0]);
-            else tileMap.SetTile(new Vector3Int(x, y, 0), debugSprite);
+            else if (E < 0.8)
+            {
+                tileMap.SetTile(new Vector3Int(x, y, 0), desert[0]);
+               
+            }
+            else if (E < 1.0)
+            {
+                tileMap.SetTile(new Vector3Int(x, y, 0), iceMountains[0]);
+                
+            } 
+            else tileMap.SetTile(new Vector3Int(x, y, 0), debugSprite[0]);
             
         }
         
